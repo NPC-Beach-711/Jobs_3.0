@@ -58,15 +58,19 @@ function init() {
     setSubmitting(true);
 
     try {
-      // MUST match HTML input name="" attributes
-      const fullNameEl = formEl.elements["fullName"];
-      const emailEl = formEl.elements["email"];
-      const phoneEl = formEl.elements["phone"];
-      const resumeEl = formEl.elements["resume"];
 
-      if (!fullNameEl || !emailEl || !resumeEl) {
-        throw new Error("Form fields missing. Confirm input names are: fullName, email, phone, resume.");
-      }
+      
+const fullNameEl = formEl.elements["fullName"];
+const emailEl = formEl.elements["email"];
+const phoneEl = formEl.elements["phone"];
+const resumeEl = formEl.elements["resume"];
+
+if (!fullNameEl || !emailEl || !resumeEl) {
+  throw new Error(
+    "Form fields not found. Check your HTML input name attributes are: fullName, email, phone, resume."
+  );
+}
+
 
       const fullName = String(fullNameEl.value || "").trim();
       const email = String(emailEl.value || "").trim();
