@@ -1,8 +1,6 @@
-// VS CODE: paste your Power Automate URL here
 const FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bda71cf8487e4c298f99ce5c9134fed0/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=4qXzBpzzxtWIS-C4mRFd-Q6ZXx5WuCnu7MWujjHKXCk";
 
-// VS CODE: basic shared secret (NOT truly secret in a public static site, but stops casual abuse)
-// Better: rotate it occasionally + add extra checks in the flow.
+
 const FORM_SECRET = "my-secret-123";
 
 function fileToBase64(file) {
