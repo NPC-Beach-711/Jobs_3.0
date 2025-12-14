@@ -26,7 +26,7 @@ document.getElementById("appForm").addEventListener("submit", async (e) => {
 
   try {
     const form = e.currentTarget;
-    const fullName = form.fullName.value.trim();
+    const name = form.name.value.trim();
     const email = form.email.value.trim();
     const phone = form.phone.value.trim();
     const notes = form.notes.value.trim();
@@ -38,7 +38,7 @@ document.getElementById("appForm").addEventListener("submit", async (e) => {
     const resumeBase64 = await fileToBase64(file);
 
     const payload = {
-      fullName,
+      name,
       email,
       phone,
       notes,
