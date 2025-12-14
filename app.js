@@ -2,6 +2,7 @@ const FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powe
 
 const FORM_SECRET = "my-secret-123";
 
+
 function setStatus(message) {
   const statusEl = document.getElementById("status");
   if (statusEl) statusEl.textContent = message || "";
@@ -15,19 +16,24 @@ function setSubmitting(isSubmitting) {
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Failed to read file."));
+
+    reader.onerror = () => reject(new Error("Failed to read the selected file."));
     reader.onload = () => {
-      // reader.result looks like: "data:application/pdf;base64,JVBERi0xLjc..."
+      // reader.result: "data:<mime>;base64,AAAA..."
       const result = String(reader.result || "");
-      const parts = result.split(",");
-      if (parts.length < 2) return reject(new Error("Unexpected file encoding."));
-      resolve(parts[1]); // base64 only
+      const commaIndex = result.indexOf(",");
+      if (commaIndex === -1) {
+        reject(new Error("Unexpected file format while encoding."));
+        return;
+      }
+      resolve(result.slice(commaIndex + 1)); // base64 only (no data: prefix)
     };
+
     reader.readAsDataURL(file);
   });
 }
 
-async function submitToFlow(payload) {
+async function postToFlow(payload) {
   const resp = await fetch(FLOW_URL, {
     method: "POST",
     headers: {
@@ -37,11 +43,9 @@ async function submitToFlow(payload) {
     body: JSON.stringify(payload)
   });
 
-  // Read response text for better debugging (Flow often returns plain text on failure)
   const text = await resp.text().catch(() => "");
 
   if (!resp.ok) {
-    // Bubble up something useful
     throw new Error(`Flow error ${resp.status}: ${text || "No response body"}`);
   }
 
@@ -51,7 +55,7 @@ async function submitToFlow(payload) {
 function init() {
   const formEl = document.getElementById("appForm");
   if (!formEl) {
-    console.error("appForm not found. Check index.html has <form id='appForm'>.");
+    console.error("Form with id='appForm' not found.");
     return;
   }
 
@@ -61,33 +65,32 @@ function init() {
     setSubmitting(true);
 
     try {
-      // IMPORTANT: these must match your HTML input name="" attributes
-      // Your HTML uses: name="name", name="email", name="phone", name="resume"
-      const fullNameInput = formEl.elements["name"];
-      const emailInput = formEl.elements["email"];
-      const phoneInput = formEl.elements["phone"];
-      const resumeInput = formEl.elements["resume"];
+      // These MUST match your HTML input name="" attributes
+      const fullNameEl = formEl.elements["fullName"];
+      const emailEl = formEl.elements["email"];
+      const phoneEl = formEl.elements["phone"];
+      const resumeEl = formEl.elements["resume"];
 
-      if (!fullNameInput || !emailInput || !resumeInput) {
+      if (!fullNameEl || !emailEl || !resumeEl) {
         throw new Error(
-          "Form fields not found. Check your HTML input name attributes are: name, email, phone, resume."
+          "Form fields missing. Confirm input names are: fullName, email, phone, resume."
         );
       }
 
-      const fullName = String(fullNameInput.value || "").trim();
-      const email = String(emailInput.value || "").trim();
-      const phone = phoneInput ? String(phoneInput.value || "").trim() : "";
+      const fullName = String(fullNameEl.value || "").trim();
+      const email = String(emailEl.value || "").trim();
+      const phone = phoneEl ? String(phoneEl.value || "").trim() : "";
 
-      const file = resumeInput.files && resumeInput.files[0] ? resumeInput.files[0] : null;
+      const file = resumeEl.files && resumeEl.files[0] ? resumeEl.files[0] : null;
 
-      if (!fullName) throw new Error("Name is required.");
+      if (!fullName) throw new Error("Full name is required.");
       if (!email) throw new Error("Email is required.");
-      if (!file) throw new Error("Resume is required.");
+      if (!file) throw new Error("Please attach a resume.");
 
-      // Optional client-side restrictions
-      const allowedExt = [".pdf", ".doc", ".docx"];
-      const lowerName = (file.name || "").toLowerCase();
-      if (!allowedExt.some((ext) => lowerName.endsWith(ext))) {
+      // Optional: basic file validation
+      const lower = (file.name || "").toLowerCase();
+      const allowed = [".pdf", ".doc", ".docx"];
+      if (!allowed.some((ext) => lower.endsWith(ext))) {
         throw new Error("Resume must be a PDF, DOC, or DOCX file.");
       }
 
@@ -100,14 +103,14 @@ function init() {
 
       // Payload keys must match your Power Automate trigger schema
       const payload = {
-        email,                // Flow maps this -> SharePoint List Title
-        fullName,             // Flow maps this -> SharePoint List Name
-        phone,                // Flow maps this -> SharePoint List Phone
+        email,                 // Flow maps -> SharePoint Title
+        fullName,              // Flow maps -> SharePoint Name
+        phone,                 // Flow maps -> SharePoint Phone
         resumeFileName: file.name,
         resumeBase64
       };
 
-      await submitToFlow(payload);
+      await postToFlow(payload);
 
       setStatus("Submitted successfully. Thank you!");
       formEl.reset();
