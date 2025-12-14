@@ -66,24 +66,24 @@ function init() {
 
     try {
       // These MUST match your HTML input name="" attributes
-      const fullNameEl = formEl.elements["fullName"];
+      const nameEl = formEl.elements["Name"];
       const emailEl = formEl.elements["email"];
       const phoneEl = formEl.elements["phone"];
       const resumeEl = formEl.elements["resume"];
 
-      if (!fullNameEl || !emailEl || !resumeEl) {
+      if (!nameEl || !emailEl || !resumeEl) {
         throw new Error(
-          "Form fields missing. Confirm input names are: fullName, email, phone, resume."
+          "Form fields missing. Confirm input names are: Name, email, phone, resume."
         );
       }
 
-      const fullName = String(fullNameEl.value || "").trim();
+      const name = String(nameEl.value || "").trim();
       const email = String(emailEl.value || "").trim();
       const phone = phoneEl ? String(phoneEl.value || "").trim() : "";
 
       const file = resumeEl.files && resumeEl.files[0] ? resumeEl.files[0] : null;
 
-      if (!fullName) throw new Error("Full name is required.");
+      if (!name) throw new Error("Full name is required.");
       if (!email) throw new Error("Email is required.");
       if (!file) throw new Error("Please attach a resume.");
 
@@ -104,7 +104,7 @@ function init() {
       // Payload keys must match your Power Automate trigger schema
       const payload = {
         email,                 // Flow maps -> SharePoint Title
-        fullName,              // Flow maps -> SharePoint Name
+        name,              // Flow maps -> SharePoint Name
         phone,                 // Flow maps -> SharePoint Phone
         resumeFileName: file.name,
         resumeBase64
