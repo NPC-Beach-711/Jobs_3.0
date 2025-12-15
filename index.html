@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Application Form</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 </head>
 <body>
   <main class="card">
@@ -31,6 +33,7 @@
     Resume
     <input name="resume" type="file" required accept=".pdf,.doc,.docx" />
   </label>
+<div class="cf-turnstile" data-sitekey="PASTE_YOUR_SITE_KEY_HERE"></div>
 
   <button type="submit" id="submitBtn">Submit</button>
   <p id="status" class="status" aria-live="polite"></p>
