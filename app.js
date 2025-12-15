@@ -54,8 +54,9 @@ function init() {
 
   formEl.addEventListener("submit", async (e) => {
     e.preventDefault();
-    setStatus("");
     setSubmitting(true);
+    setStatus("Uploading resume…");
+
 
     try {
       const fullNameEl = formEl.elements["fullName"];
@@ -107,6 +108,7 @@ function init() {
         turnstileToken
       };
 
+      setStatus("Saving your application…");
       await postToFlow(payload);
 
       setStatus("Submitted successfully. Thank you!");
