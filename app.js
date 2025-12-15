@@ -71,7 +71,6 @@ if (!fullNameEl || !emailEl || !resumeEl) {
   );
 }
 
-
       const fullName = String(fullNameEl.value || "").trim();
       const email = String(emailEl.value || "").trim();
       const phone = phoneEl ? String(phoneEl.value || "").trim() : "";
@@ -94,6 +93,11 @@ if (!fullNameEl || !emailEl || !resumeEl) {
       }
 
       const resumeBase64 = await fileToBase64(file);
+const turnstileToken =
+  document.querySelector('input[name="cf-turnstile-response"]')?.value || "";
+
+if (!turnstileToken) throw new Error("Please complete the Turnstile check.");
+
 
       const payload = {
         email,            // Flow maps to SharePoint Title
@@ -102,6 +106,14 @@ if (!fullNameEl || !emailEl || !resumeEl) {
         resumeFileName: file.name,
         resumeBase64
       };
+const payload = {
+  email,
+  fullName,
+  phone,
+  resumeFileName: file.name,
+  resumeBase64,
+  turnstileToken
+};
 
       await postToFlow(payload);
 
