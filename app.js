@@ -58,18 +58,16 @@ function init() {
     setSubmitting(true);
 
     try {
+      const fullNameEl = formEl.elements["fullName"];
+      const emailEl = formEl.elements["email"];
+      const phoneEl = formEl.elements["phone"];
+      const resumeEl = formEl.elements["resume"];
 
-      
-const fullNameEl = formEl.elements["fullName"];
-const emailEl = formEl.elements["email"];
-const phoneEl = formEl.elements["phone"];
-const resumeEl = formEl.elements["resume"];
-
-if (!fullNameEl || !emailEl || !resumeEl) {
-  throw new Error(
-    "Form fields not found. Check your HTML input name attributes are: fullName, email, phone, resume."
-  );
-}
+      if (!fullNameEl || !emailEl || !resumeEl) {
+        throw new Error(
+          "Form fields not found. Check your HTML input name attributes are: fullName, email, phone, resume."
+        );
+      }
 
       const fullName = String(fullNameEl.value || "").trim();
       const email = String(emailEl.value || "").trim();
@@ -93,32 +91,31 @@ if (!fullNameEl || !emailEl || !resumeEl) {
       }
 
       const resumeBase64 = await fileToBase64(file);
-const turnstileToken =
-  document.querySelector('input[name="cf-turnstile-response"]')?.value || "";
 
-if (!turnstileToken) throw new Error("Please complete the Turnstile check.");
+      const turnstileToken =
+        document.querySelector('input[name="cf-turnstile-response"]')?.value || "";
 
+      if (!turnstileToken) throw new Error("Please complete the Turnstile check.");
 
+      // Payload keys must match your Power Automate trigger schema
       const payload = {
         email,            // Flow maps to SharePoint Title
         fullName,         // Flow maps to SharePoint Name column
         phone,
         resumeFileName: file.name,
-        resumeBase64
+        resumeBase64,
+        turnstileToken
       };
-const payload = {
-  email,
-  fullName,
-  phone,
-  resumeFileName: file.name,
-  resumeBase64,
-  turnstileToken
-};
 
       await postToFlow(payload);
 
       setStatus("Submitted successfully. Thank you!");
       formEl.reset();
+
+      // Optional: reset Turnstile widget after success (if available)
+      if (window.turnstile && typeof window.turnstile.reset === "function") {
+        window.turnstile.reset();
+      }
     } catch (err) {
       console.error(err);
       setStatus(err && err.message ? err.message : "Submission failed.");
